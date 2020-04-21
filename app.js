@@ -7,3 +7,10 @@ for (let i = 0; i < randomWord.length; i++) {
     placeholders += '_ ';
 }
 document.getElementById('placeholders').innerHTML = placeholders;
+
+let letters = [];
+document.addEventListener('keydown', event => {
+    let letter = event.key;
+    letters.push(letter);
+    document.getElementById('letters').innerHTML = letters.join();
+});
