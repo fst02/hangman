@@ -41,9 +41,7 @@ let lives = 6;
 let letters = [];
 document.addEventListener('keydown', event => {
     let letter = event.key;
-    letters.push(letter);
-    document.getElementById('letters').innerHTML = letters.join();
-
+   
     let guess = randomWord.includes(letter);
     if (guess) {
         let letterIndex = randomWord.indexOf(letter);
@@ -61,6 +59,8 @@ document.addEventListener('keydown', event => {
         render();
     } else {
         lives -= 1;
-        renderImage(); 
+        letters.push(letter);
+        document.getElementById('letters').innerHTML = letters.join(); 
+        renderImage();
     }
 })
