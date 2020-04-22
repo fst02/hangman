@@ -26,6 +26,12 @@ function renderImage() {
             break;     
     }*/
 }
+
+function checkWin() {
+    if (!placeholders.includes('_')) {
+        document.getElementById('winnerMessage').innerHTML = 'Congratulations, you won!';
+    }
+}
 const words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 
 let randomWord = words[Math.floor(Math.random() * words.length)];
@@ -57,6 +63,7 @@ document.addEventListener('keydown', event => {
         }*/
 
         render();
+        checkWin();
     } else {
         lives -= 1;
         letters.push(letter);
