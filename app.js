@@ -3,6 +3,7 @@ function render() {
 }
 const words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 
+
 let randomWord = words[Math.floor(Math.random() * words.length)];
 
 let placeholders = [];
@@ -20,7 +21,16 @@ document.addEventListener('keydown', event => {
     let guess = randomWord.includes(letter);
     if (guess) {
         let letterIndex = randomWord.indexOf(letter);
-        placeholders[letterIndex] = letter;
+        while (letterIndex != -1) {
+            placeholders[letterIndex] = letter;
+            letterIndex = randomWord.indexOf(letter, letterIndex + 1);
+        }
+
+        /*for (let i = 0; i < randomWord.length; i++) {
+            if(randomWord[i] == letter) {
+                placeholders[i] = letter;
+            }
+        }*/
         render();
     }
 })
