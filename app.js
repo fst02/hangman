@@ -4,12 +4,19 @@ let randomWord;
 let lives;
 let letters = [];
 let placeholders = [];
+let status;
+
+function alphaOnly(event) {
+    var key = event.keyCode;
+    return ((key >= 65 && key <= 90));
+};
 
 function render() {
     document.getElementById('placeholders').innerHTML = placeholders.join(' ');
 }
 
 function init() {
+    status = 'inProgress';
     placeholders.length = 0;
     lives = 6;
     letters = [];
@@ -22,7 +29,7 @@ function init() {
 function loadGame() {
     init();
     document.getElementById('randomWord').innerHTML = randomWord;
-    
+
     for (let i = 0; i < randomWord.length; i++) {
         placeholders.push('_');
     }
@@ -56,46 +63,51 @@ function renderImage() {
 
 function checkLose() {
     if (lives == 0) {
-        setResult('You lost!', 'blue');   
+        setResult('You lost!', 'blue');
+        status = 'failed';
     }
 }
 
 function checkWin() {
     if (!placeholders.includes('_')) {
         setResult('Congratulations, You won!', 'red');
+        status = 'success';
     }
 }
 
-function setResult(message, color){
+function setResult(message, color) {
     document.getElementById('resultMessage').innerHTML = message;
     document.getElementById('resultMessage').style.color = color;
 }
 
 document.addEventListener('keydown', event => {
     // event.stopImmediatePropagation();
-     let letter = event.key;
- 
-     let guess = randomWord.includes(letter);
-     if (guess) {
-         let letterIndex = randomWord.indexOf(letter);
-         while (letterIndex != -1) {
-             placeholders[letterIndex] = letter;
-             letterIndex = randomWord.indexOf(letter, letterIndex + 1);
-         }
-         /* Alternative of while
-         for (let i = 0; i < randomWord.length; i++) {
-             if(randomWord[i] == letter) {
-                 placeholders[i] = letter;
-             }
-         }*/
-     
-         render();
-         checkWin();
-     } else {
-         lives -= 1;
-         letters.push(letter);
-         document.getElementById('letters').innerHTML = letters.join();
-         renderImage();
-         checkLose();
-     }
- })
+    let letter = event.key.toLowerCase();
+    if (!alphaOnly(event) || status != 'inProgress') {
+        return false;
+    }
+
+    let guess = randomWord.includes(letter);
+    if (guess) {
+        let letterIndex = randomWord.indexOf(letter);
+        while (letterIndex != -1) {
+            placeholders[letterIndex] = letter;
+            letterIndex = randomWord.indexOf(letter, letterIndex + 1);
+        }
+        /* Alternative of while
+        for (let i = 0; i < randomWord.length; i++) {
+            if(randomWord[i] == letter) {
+                placeholders[i] = letter;
+            }
+        }*/
+
+        render();
+        checkWin();
+    } else {
+        lives -= 1;
+        letters.push(letter);
+        document.getElementById('letters').innerHTML = letters.join();
+        renderImage();
+        checkLose();
+    }
+})
