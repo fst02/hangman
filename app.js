@@ -27,10 +27,21 @@ function renderImage() {
     }*/
 }
 
+function checkLose() {
+    if (lives == 0) {
+        setResult('You lost!', 'blue');   
+    }
+}
+
 function checkWin() {
     if (!placeholders.includes('_')) {
-        document.getElementById('winnerMessage').innerHTML = 'Congratulations, you won!';
+        setResult('Congratulations, You won!', 'red');
     }
+}
+
+function setResult(message, color){
+    document.getElementById('resultMessage').innerHTML = message;
+    document.getElementById('resultMessage').style.color = color;
 }
 const words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 
@@ -47,14 +58,14 @@ let lives = 6;
 let letters = [];
 document.addEventListener('keydown', event => {
     let letter = event.key;
-   
+
     let guess = randomWord.includes(letter);
     if (guess) {
         let letterIndex = randomWord.indexOf(letter);
         while (letterIndex != -1) {
             placeholders[letterIndex] = letter;
             letterIndex = randomWord.indexOf(letter, letterIndex + 1);
-        } 
+        }
         /* Alternative of while
         for (let i = 0; i < randomWord.length; i++) {
             if(randomWord[i] == letter) {
@@ -67,7 +78,8 @@ document.addEventListener('keydown', event => {
     } else {
         lives -= 1;
         letters.push(letter);
-        document.getElementById('letters').innerHTML = letters.join(); 
+        document.getElementById('letters').innerHTML = letters.join();
         renderImage();
+        checkLose();
     }
 })
