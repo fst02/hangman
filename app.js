@@ -27,9 +27,6 @@ function loadGame() {
         placeholders.push('_');
     }
     render();
-    
-    
-
 }
 
 function renderImage() {
