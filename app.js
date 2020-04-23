@@ -2,7 +2,7 @@ const words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 
 
 let randomWord;
 let lives;
-let letters = [];
+let wrongLetters = [];
 let placeholders = [];
 let status;
 
@@ -19,8 +19,8 @@ function init() {
     status = 'inProgress';
     placeholders.length = 0;
     lives = 6;
-    letters = [];
-    document.getElementById('letters').innerHTML = letters.join();
+    wrongLetters = [];
+    document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
     randomWord = words[Math.floor(Math.random() * words.length)];
     renderImage();
     setResult('', '');
@@ -83,7 +83,7 @@ function setResult(message, color) {
 document.addEventListener('keydown', event => {
     // event.stopImmediatePropagation();
     let letter = event.key.toLowerCase();
-    if (!alphaOnly(event) || status != 'inProgress') {
+    if (!alphaOnly(event) || status != 'inProgress' || wrongLetters.includes(letter)) {
         return false;
     }
 
@@ -105,8 +105,8 @@ document.addEventListener('keydown', event => {
         checkWin();
     } else {
         lives -= 1;
-        letters.push(letter);
-        document.getElementById('letters').innerHTML = letters.join();
+        wrongLetters.push(letter);
+        document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
         renderImage();
         checkLose();
     }
