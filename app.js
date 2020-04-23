@@ -9,21 +9,60 @@ function getValueOrDefault(message, defaultValue) {
     return temp;
 }
 
+let winCount = window.localStorage.getItem('winCountKey');
+let lossCount = window.localStorage.getItem('lossCountKey');
+
+function resetScore() {
+        winCount = 0;
+        window.localStorage.setItem('winCountKey', 0);
+        lossCount = 0;
+        window.localStorage.setItem('lossCountKey', 0);
+}
+
 function setUser() {
     let player = window.localStorage.getItem('userName');
     if (player == null) {
         player = getValueOrDefault('Please choose a name: ', 'Anonymous');
     }
     else {
-        player = getValueOrDefault('Please change your name, if you wish: ', player)
+        player = getValueOrDefault('Please change your name, if you wish: ', player);
+        if (player != window.localStorage.getItem('userName')) {
+            resetScore();
+        }
     }
     window.localStorage.setItem('userName', player);
     document.getElementById('welcomeUser').innerHTML = 'Welcome ' + player + '!';
+    if (winCount == null || lossCount == null) {
+        resetScore();
+    }
+    renderScore();
 }
 
+function renderScore() {
+    document.getElementById('userScore').innerHTML = 'Your wins: ' + winCount + '<br>Your losses: ' + lossCount;
+}
+
+function setStatus(newStatus){
+    switch (newStatus){
+        case 'success':  
+            winCount++;                           
+            window.localStorage.setItem('winCountKey', winCount);
+            setResult('Congratulations, You won!', 'red');
+            status = 'success';
+            break; 
+
+        case 'failed':  
+            lossCount++;                           
+            window.localStorage.setItem('lossCountKey', lossCount);
+            setResult('You lost!', 'blue');
+            status = 'failed';
+            break;  
+        } 
+    renderScore();
+}
 setUser();
 
-fetch('https://random-word-api.herokuapp.com/word?number=50')
+fetch('https://random-word-api.herokuapp.com/word?number=512')
     .then((response) => {
         return response.json();
     })
@@ -102,15 +141,13 @@ function renderImage() {
 
 function checkLose() {
     if (lives == 0) {
-        setResult('You lost!', 'blue');
-        status = 'failed';
+        setStatus('failed');
     }
 }
 
 function checkWin() {
     if (!placeholders.includes('_')) {
-        setResult('Congratulations, You won!', 'red');
-        status = 'success';
+        setStatus('success');
     }
 }
 
