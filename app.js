@@ -56,6 +56,7 @@ function setStatus(newStatus){
             window.localStorage.setItem('lossCountKey', lossCount);
             setResult('You lost!', 'blue');
             status = 'failed';
+            document.getElementById('randomWord').style.display = 'block';
             break;  
         } 
     renderScore();
@@ -93,8 +94,21 @@ function render() {
     document.getElementById('placeholders').innerHTML = placeholders.join(' ');
 }
 
+function switchButtonName() {
+    switch (status) {
+        case 'inProgress':
+            document.getElementById('newGame').innerHTML = 'Restart';
+            break;
+        case 'success':
+        case 'failed':
+            document.getElementById('newGame').innerHTML = 'New game';
+            break;
+    }
+}
+
 function init() {
     status = 'inProgress';
+    switchButtonName();
     placeholders.length = 0;
     lives = 6;
     wrongLetters = [];
@@ -102,16 +116,25 @@ function init() {
     randomWord = words[Math.floor(Math.random() * words.length)];
     renderImage();
     setResult('', '');
+    document.getElementById('randomWord').style.display = 'none';
 }
 
-function loadGame() {
-    init();
-    document.getElementById('randomWord').innerHTML = randomWord;
-
-    for (let i = 0; i < randomWord.length; i++) {
-        placeholders.push('_');
+function loadGame(){
+    let needNewRound = true;
+    if (document.getElementById('newGame').innerHTML != 'New game') {
+        needNewRound = confirm('Are you sure you want to restart your game?');
+        if (needNewRound) {
+            setStatus('failed');
+        }
     }
-    render();
+    if (needNewRound) {
+        init();
+        document.getElementById('randomWord').innerHTML = randomWord;
+        for (let i = 0; i < randomWord.length; i++) {
+            placeholders.push('_');
+        }
+        render();
+    }
 }
 
 function renderImage() {
@@ -143,12 +166,14 @@ function checkLose() {
     if (lives == 0) {
         setStatus('failed');
     }
+    switchButtonName();
 }
 
 function checkWin() {
     if (!placeholders.includes('_')) {
         setStatus('success');
     }
+    switchButtonName();
 }
 
 function setResult(message, color) {
