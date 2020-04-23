@@ -1,4 +1,20 @@
-const words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
+let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
+
+fetch('https://random-word-api.herokuapp.com/word?number=50')
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    words = data;
+  });
+
+/*var request = new XMLHttpRequest();
+request.open('GET', 'https://random-word-api.herokuapp.com/word?number=50', true);
+request.onload = function() {
+  // Begin accessing JSON data here
+  words = JSON.parse(this.response);
+}
+request.send();*/
 
 let randomWord;
 let lives;
