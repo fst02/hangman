@@ -1,12 +1,35 @@
 let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 
+
+function getValueOrDefault(message, defaultValue) {
+    let temp = prompt(message, defaultValue);
+    if (temp == null) {
+        return defaultValue;
+    }
+    return temp;
+}
+
+function setUser() {
+    let player = window.localStorage.getItem('userName');
+    if (player == null) {
+        player = getValueOrDefault('Please choose a name: ', 'Anonymous');
+    }
+    else {
+        player = getValueOrDefault('Please change your name, if you wish: ', player)
+    }
+    window.localStorage.setItem('userName', player);
+    document.getElementById('welcomeUser').innerHTML = 'Welcome ' + player + '!';
+}
+
+setUser();
+
 fetch('https://random-word-api.herokuapp.com/word?number=50')
-  .then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    words = data;
-  });
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        words = data;
+    });
 
 /*var request = new XMLHttpRequest();
 request.open('GET', 'https://random-word-api.herokuapp.com/word?number=50', true);
