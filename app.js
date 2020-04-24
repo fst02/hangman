@@ -7,32 +7,19 @@ let status;
 let winCount = window.localStorage.getItem('winCountKey');
 let lossCount = window.localStorage.getItem('lossCountKey');
 
-function switchButtonName() {
-  switch (status) {
-    case 'inProgress':
-      document.getElementById('newGame').innerHTML = 'Restart';
-      break;
-    default:
-      document.getElementById('newGame').innerHTML = 'New game';
-      break;
-  }
-}
-
-function setResult(message, color) {
-  document.getElementById('resultMessage').innerHTML = message;
-  document.getElementById('resultMessage').style.color = color;
+function isCharacterValid(event) {
+  const key = event.keyCode;
+  return key >= 65 && key <= 90;
 }
 
 const model = {
   init() {
     status = 'inProgress';
-    switchButtonName();
     placeholders.length = 0;
     lives = 6;
     wrongLetters = [];
     document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
     randomWord = words[Math.floor(Math.random() * words.length)];
-    setResult('', '');
     document.getElementById('randomWord').style.display = 'none';
   },
 };
@@ -48,136 +35,140 @@ const view = {
   renderPlaceholders() {
     document.getElementById('placeholders').innerHTML = placeholders.join(' ');
   },
+  switchButtonName() {
+    switch (status) {
+      case 'inProgress':
+        document.getElementById('newGame').innerHTML = 'Restart';
+        break;
+      default:
+        document.getElementById('newGame').innerHTML = 'New game';
+        break;
+    }
+  },
+  setResult(message, color) {
+    document.getElementById('resultMessage').innerHTML = message;
+    document.getElementById('resultMessage').style.color = color;
+  },
 };
 
 const controller = {
   init() {
     model.init();
     view.renderImage();
+    view.switchButtonName();
+    view.setResult('', '');
   },
-};
-
-function alphaOnly(event) {
-  const key = event.keyCode;
-  return ((key >= 65 && key <= 90));
-}
-
-function getValueOrDefault(message, defaultValue) {
-  const temp = prompt(message, defaultValue);
-  if (temp == null) {
-    return defaultValue;
-  }
-  return temp;
-}
-
-function resetScore() {
-  winCount = 0;
-  window.localStorage.setItem('winCountKey', 0);
-  lossCount = 0;
-  window.localStorage.setItem('lossCountKey', 0);
-}
-
-function setStatus(newStatus) {
-  switch (newStatus) {
-    case 'success':
-      winCount++;
-      window.localStorage.setItem('winCountKey', winCount);
-      setResult('Congratulations, You won!', 'red');
-      status = 'success';
-      break;
-    case 'failed':
-      lossCount++;
-      window.localStorage.setItem('lossCountKey', lossCount);
-      setResult('You lost!', 'blue');
-      status = 'failed';
-      document.getElementById('randomWord').style.display = 'block';
-      break;
-    default:
-      break;
-  }
-  view.renderScore();
-}
-
-function loadGame() {
-  let needNewRound = true;
-  if (document.getElementById('newGame').innerHTML !== 'New game') {
-    needNewRound = window.confirm('Are you sure you want to restart your game?');
-    if (needNewRound) {
-      setStatus('failed');
+  loadGame() {
+    if (document.getElementById('newGame').innerHTML !== 'New game') {
+      if (!window.confirm('Are you sure you want to restart your game?')) {
+        return;
+      }
+      controller.setStatus('failed');
     }
-  }
-  if (needNewRound) {
     controller.init();
     document.getElementById('randomWord').innerHTML = randomWord;
     for (let i = 0; i < randomWord.length; i++) {
       placeholders.push('_');
     }
     view.renderPlaceholders();
-  }
-}
-
-function setUser() {
-  let player = window.localStorage.getItem('userName');
-  if (player == null) {
-    player = getValueOrDefault('Please choose a name: ', 'Anonymous');
-  } else {
-    player = getValueOrDefault('Please change your name, if you wish: ', player);
-    if (player !== window.localStorage.getItem('userName')) {
-      resetScore();
+  },
+  setStatus(newStatus) {
+    switch (newStatus) {
+      case 'success':
+        winCount++;
+        window.localStorage.setItem('winCountKey', winCount);
+        view.setResult('Congratulations, You won!', 'red');
+        status = 'success';
+        break;
+      case 'failed':
+        lossCount++;
+        window.localStorage.setItem('lossCountKey', lossCount);
+        view.setResult('You lost!', 'blue');
+        status = 'failed';
+        document.getElementById('randomWord').style.display = 'block';
+        break;
+      default:
+        break;
     }
-  }
-  window.localStorage.setItem('userName', player);
-  document.getElementById('welcomeUser').innerHTML = `Welcome ${player} !`;
-  if (winCount == null || lossCount == null) {
-    resetScore();
-  }
-  view.renderScore();
-}
-
-function checkLose() {
-  if (lives === 0) {
-    setStatus('failed');
-  }
-  switchButtonName();
-}
-
-function checkWin() {
-  if (!placeholders.includes('_')) {
-    setStatus('success');
-  }
-  switchButtonName();
-}
-
-fetch('https://random-word-api.herokuapp.com/word?number=512')
-  .then((response) => response.json())
-  .then((data) => {
-    words = data;
-  });
-
-setUser();
-
-document.getElementById('newGame').addEventListener('click', loadGame);
-
-document.addEventListener('keydown', (event) => {
-  const letter = event.key.toLowerCase();
-  if (!alphaOnly(event) || status !== 'inProgress' || wrongLetters.includes(letter)) {
-    return;
-  }
-
-  const guess = randomWord.includes(letter);
-  if (guess) {
-    let letterIndex = randomWord.indexOf(letter);
-    while (letterIndex !== -1) {
-      placeholders[letterIndex] = letter;
-      letterIndex = randomWord.indexOf(letter, letterIndex + 1);
+    view.renderScore();
+  },
+  checkWin() {
+    if (!placeholders.includes('_')) {
+      controller.setStatus('success');
     }
-    view.renderPlaceholders();
-    checkWin();
-  } else {
-    lives -= 1;
-    wrongLetters.push(letter);
-    document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
-    view.renderImage();
-    checkLose();
-  }
-});
+    view.switchButtonName();
+  },
+  checkLose() {
+    if (lives === 0) {
+      controller.setStatus('failed');
+    }
+    view.switchButtonName();
+  },
+  getValueOrDefault(message, defaultValue) {
+    const temp = prompt(message, defaultValue);
+    if (temp == null) {
+      return defaultValue;
+    }
+    return temp;
+  },
+  resetScore() {
+    winCount = 0;
+    window.localStorage.setItem('winCountKey', 0);
+    lossCount = 0;
+    window.localStorage.setItem('lossCountKey', 0);
+  },
+  setUser() {
+    let player = window.localStorage.getItem('userName');
+    if (player == null) {
+      player = controller.getValueOrDefault('Please choose a name: ', 'Anonymous');
+    } else {
+      player = controller.getValueOrDefault('Please change your name, if you wish: ', player);
+      if (player !== window.localStorage.getItem('userName')) {
+        controller.resetScore();
+      }
+    }
+    window.localStorage.setItem('userName', player);
+    document.getElementById('welcomeUser').innerHTML = `Welcome ${player} !`;
+    if (winCount == null || lossCount == null) {
+      controller.resetScore();
+    }
+    view.renderScore();
+  },
+  start() {
+    fetch('https://random-word-api.herokuapp.com/word?number=512')
+      .then((response) => response.json())
+      .then((data) => {
+        words = data;
+      });
+
+    controller.setUser();
+
+    document.getElementById('newGame').addEventListener('click', controller.loadGame);
+
+    document.addEventListener('keydown', (event) => {
+      const letter = event.key.toLowerCase();
+      if (!isCharacterValid(event) || status !== 'inProgress' || wrongLetters.includes(letter)) {
+        return;
+      }
+
+      const guess = randomWord.includes(letter);
+      if (guess) {
+        let letterIndex = randomWord.indexOf(letter);
+        while (letterIndex !== -1) {
+          placeholders[letterIndex] = letter;
+          letterIndex = randomWord.indexOf(letter, letterIndex + 1);
+        }
+        view.renderPlaceholders();
+        controller.checkWin();
+      } else {
+        lives -= 1;
+        wrongLetters.push(letter);
+        document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
+        view.renderImage();
+        controller.checkLose();
+      }
+    });
+  },
+};
+
+controller.start();
