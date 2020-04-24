@@ -7,6 +7,56 @@ let status;
 let winCount = window.localStorage.getItem('winCountKey');
 let lossCount = window.localStorage.getItem('lossCountKey');
 
+function switchButtonName() {
+  switch (status) {
+    case 'inProgress':
+      document.getElementById('newGame').innerHTML = 'Restart';
+      break;
+    default:
+      document.getElementById('newGame').innerHTML = 'New game';
+      break;
+  }
+}
+
+function setResult(message, color) {
+  document.getElementById('resultMessage').innerHTML = message;
+  document.getElementById('resultMessage').style.color = color;
+}
+
+const model = {
+  init() {
+    status = 'inProgress';
+    switchButtonName();
+    placeholders.length = 0;
+    lives = 6;
+    wrongLetters = [];
+    document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
+    randomWord = words[Math.floor(Math.random() * words.length)];
+    setResult('', '');
+    document.getElementById('randomWord').style.display = 'none';
+  },
+};
+
+const view = {
+  renderScore() {
+    document.getElementById('userScore').innerHTML = `Your wins: ${winCount}<br>Your losses: ${lossCount}`;
+  },
+  renderImage() {
+    const gallowSrc = `images/gallow${lives}.png`;
+    document.getElementById('gallowTree').src = gallowSrc;
+  },
+  renderPlaceholders() {
+    document.getElementById('placeholders').innerHTML = placeholders.join(' ');
+  },
+};
+
+const controller = {
+  init() {
+    model.init();
+    view.renderImage();
+  },
+};
+
 function alphaOnly(event) {
   const key = event.keyCode;
   return ((key >= 65 && key <= 90));
@@ -27,44 +77,6 @@ function resetScore() {
   window.localStorage.setItem('lossCountKey', 0);
 }
 
-function renderScore() {
-  document.getElementById('userScore').innerHTML = `Your wins: ${winCount}<br>Your losses: ${lossCount}`;
-}
-
-function switchButtonName() {
-  switch (status) {
-    case 'inProgress':
-      document.getElementById('newGame').innerHTML = 'Restart';
-      break;
-    default:
-      document.getElementById('newGame').innerHTML = 'New game';
-      break;
-  }
-}
-
-function renderImage() {
-  const gallowSrc = `images/gallow${lives}.png`;
-  document.getElementById('gallowTree').src = gallowSrc;
-}
-
-function setResult(message, color) {
-  document.getElementById('resultMessage').innerHTML = message;
-  document.getElementById('resultMessage').style.color = color;
-}
-
-function init() {
-  status = 'inProgress';
-  switchButtonName();
-  placeholders.length = 0;
-  lives = 6;
-  wrongLetters = [];
-  document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
-  randomWord = words[Math.floor(Math.random() * words.length)];
-  renderImage();
-  setResult('', '');
-  document.getElementById('randomWord').style.display = 'none';
-}
-
 function setStatus(newStatus) {
   switch (newStatus) {
     case 'success':
@@ -83,11 +95,7 @@ function setStatus(newStatus) {
     default:
       break;
   }
-  renderScore();
-}
-
-function render() {
-  document.getElementById('placeholders').innerHTML = placeholders.join(' ');
+  view.renderScore();
 }
 
 function loadGame() {
@@ -99,12 +107,12 @@ function loadGame() {
     }
   }
   if (needNewRound) {
-    init();
+    controller.init();
     document.getElementById('randomWord').innerHTML = randomWord;
     for (let i = 0; i < randomWord.length; i++) {
       placeholders.push('_');
     }
-    render();
+    view.renderPlaceholders();
   }
 }
 
@@ -123,7 +131,7 @@ function setUser() {
   if (winCount == null || lossCount == null) {
     resetScore();
   }
-  renderScore();
+  view.renderScore();
 }
 
 function checkLose() {
@@ -163,13 +171,13 @@ document.addEventListener('keydown', (event) => {
       placeholders[letterIndex] = letter;
       letterIndex = randomWord.indexOf(letter, letterIndex + 1);
     }
-    render();
+    view.renderPlaceholders();
     checkWin();
   } else {
     lives -= 1;
     wrongLetters.push(letter);
     document.getElementById('wrongLetters').innerHTML = wrongLetters.join();
-    renderImage();
+    view.renderImage();
     checkLose();
   }
 });
