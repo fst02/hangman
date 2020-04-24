@@ -1,5 +1,7 @@
-let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
-
+function alphaOnly(event) {
+    var key = event.keyCode;
+    return ((key >= 65 && key <= 90));
+}
 
 function getValueOrDefault(message, defaultValue) {
     let temp = prompt(message, defaultValue);
@@ -9,9 +11,6 @@ function getValueOrDefault(message, defaultValue) {
     return temp;
 }
 
-let winCount = window.localStorage.getItem('winCountKey');
-let lossCount = window.localStorage.getItem('lossCountKey');
-
 function resetScore() {
         winCount = 0;
         window.localStorage.setItem('winCountKey', 0);
@@ -19,91 +18,8 @@ function resetScore() {
         window.localStorage.setItem('lossCountKey', 0);
 }
 
-function setUser() {
-    let player = window.localStorage.getItem('userName');
-    if (player == null) {
-        player = getValueOrDefault('Please choose a name: ', 'Anonymous');
-    }
-    else {
-        player = getValueOrDefault('Please change your name, if you wish: ', player);
-        if (player != window.localStorage.getItem('userName')) {
-            resetScore();
-        }
-    }
-    window.localStorage.setItem('userName', player);
-    document.getElementById('welcomeUser').innerHTML = 'Welcome ' + player + '!';
-    if (winCount == null || lossCount == null) {
-        resetScore();
-    }
-    renderScore();
-}
-
 function renderScore() {
     document.getElementById('userScore').innerHTML = 'Your wins: ' + winCount + '<br>Your losses: ' + lossCount;
-}
-
-function setStatus(newStatus){
-    switch (newStatus){
-        case 'success':  
-            winCount++;                           
-            window.localStorage.setItem('winCountKey', winCount);
-            setResult('Congratulations, You won!', 'red');
-            status = 'success';
-            break; 
-
-        case 'failed':  
-            lossCount++;                           
-            window.localStorage.setItem('lossCountKey', lossCount);
-            setResult('You lost!', 'blue');
-            status = 'failed';
-            document.getElementById('randomWord').style.display = 'block';
-            break;  
-        } 
-    renderScore();
-}
-setUser();
-
-fetch('https://random-word-api.herokuapp.com/word?number=512')
-    .then((response) => {
-        return response.json();
-    })
-    .then((data) => {
-        words = data;
-    });
-
-/*var request = new XMLHttpRequest();
-request.open('GET', 'https://random-word-api.herokuapp.com/word?number=50', true);
-request.onload = function() {
-  // Begin accessing JSON data here
-  words = JSON.parse(this.response);
-}
-request.send();*/
-
-let randomWord;
-let lives;
-let wrongLetters = [];
-let placeholders = [];
-let status;
-
-function alphaOnly(event) {
-    var key = event.keyCode;
-    return ((key >= 65 && key <= 90));
-};
-
-function render() {
-    document.getElementById('placeholders').innerHTML = placeholders.join(' ');
-}
-
-function switchButtonName() {
-    switch (status) {
-        case 'inProgress':
-            document.getElementById('newGame').innerHTML = 'Restart';
-            break;
-        case 'success':
-        case 'failed':
-            document.getElementById('newGame').innerHTML = 'New game';
-            break;
-    }
 }
 
 function init() {
@@ -137,29 +53,64 @@ function loadGame(){
     }
 }
 
+function setUser() {
+    let player = window.localStorage.getItem('userName');
+    if (player == null) {
+        player = getValueOrDefault('Please choose a name: ', 'Anonymous');
+    }
+    else {
+        player = getValueOrDefault('Please change your name, if you wish: ', player);
+        if (player != window.localStorage.getItem('userName')) {
+            resetScore();
+        }
+    }
+    window.localStorage.setItem('userName', player);
+    document.getElementById('welcomeUser').innerHTML = 'Welcome ' + player + '!';
+    if (winCount == null || lossCount == null) {
+        resetScore();
+    }
+    renderScore();
+}
+
+function setStatus(newStatus){
+    switch (newStatus){
+        case 'success':  
+            winCount++;                           
+            window.localStorage.setItem('winCountKey', winCount);
+            setResult('Congratulations, You won!', 'red');
+            status = 'success';
+            break; 
+
+        case 'failed':  
+            lossCount++;                           
+            window.localStorage.setItem('lossCountKey', lossCount);
+            setResult('You lost!', 'blue');
+            status = 'failed';
+            document.getElementById('randomWord').style.display = 'block';
+            break;  
+        } 
+    renderScore();
+}
+
+function render() {
+    document.getElementById('placeholders').innerHTML = placeholders.join(' ');
+}
+
+function switchButtonName() {
+    switch (status) {
+        case 'inProgress':
+            document.getElementById('newGame').innerHTML = 'Restart';
+            break;
+        case 'success':
+        case 'failed':
+            document.getElementById('newGame').innerHTML = 'New game';
+            break;
+    }
+}
+
 function renderImage() {
     let gallowSrc = 'images/gallow' + lives + '.png';
     document.getElementById('gallowTree').src = gallowSrc;
-    /*switch (lives) {
-        case 5:
-            document.getElementById('gallowTree').src = 'images/gallow5.png';
-            break;
-        case 4:
-            document.getElementById('gallowTree').src = 'images/gallow4.png';
-            break;
-        case 3:
-            document.getElementById('gallowTree').src = 'images/gallow3.png';
-            break;
-        case 2:
-            document.getElementById('gallowTree').src = 'images/gallow2.png';
-            break;
-        case 1:
-            document.getElementById('gallowTree').src = 'images/gallow1.png';
-            break;
-        case 0:
-            document.getElementById('gallowTree').src = 'images/gallow0.png';
-            break;     
-    }*/
 }
 
 function checkLose() {
@@ -181,8 +132,26 @@ function setResult(message, color) {
     document.getElementById('resultMessage').style.color = color;
 }
 
+let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
+let randomWord;
+let lives;
+let wrongLetters = [];
+let placeholders = [];
+let status;
+let winCount = window.localStorage.getItem('winCountKey');
+let lossCount = window.localStorage.getItem('lossCountKey');
+
+fetch('https://random-word-api.herokuapp.com/word?number=512')
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        words = data;
+    });
+
+setUser();
+
 document.addEventListener('keydown', event => {
-    // event.stopImmediatePropagation();
     let letter = event.key.toLowerCase();
     if (!alphaOnly(event) || status != 'inProgress' || wrongLetters.includes(letter)) {
         return false;
@@ -195,13 +164,6 @@ document.addEventListener('keydown', event => {
             placeholders[letterIndex] = letter;
             letterIndex = randomWord.indexOf(letter, letterIndex + 1);
         }
-        /* Alternative of while
-        for (let i = 0; i < randomWord.length; i++) {
-            if(randomWord[i] == letter) {
-                placeholders[i] = letter;
-            }
-        }*/
-
         render();
         checkWin();
     } else {
@@ -211,4 +173,4 @@ document.addEventListener('keydown', event => {
         renderImage();
         checkLose();
     }
-})
+});
