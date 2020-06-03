@@ -96,8 +96,10 @@ const controller = {
   checkWin() {
     if (!placeholders.includes('_')) {
       controller.setStatus('success');
+      score = lives * 10;
+      controller.sendToLeaderboard();
     }
-    score = lives * 10;
+
     view.switchButtonName();
   },
   checkLose() {
@@ -137,6 +139,57 @@ const controller = {
     }
     view.renderScore();
   },
+
+  logIn() {
+    const email = document.getElementById('signInEmail').value;
+    const password = document.getElementById('signInPassword').value;
+    fetch('http://fullstack.braininghub.com:3000/api/authenticateUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.token) {
+          document.getElementById('register').classList.remove('d-none');
+        } else {
+          window.localStorage.setItem('token', data.token);
+        }
+      });
+  },
+
+  sendToLeaderboard() {
+    const numberOfRounds = winCount + lossCount;
+    const player = window.localStorage.getItem('userName');
+    const token = window.localStorage.getItem('token');
+    if (!token) {
+      document.getElementById('saveScoreFeedback').classList.remove('d-none');
+    } else {
+      fetch('http://fullstack.braininghub.com:3000/api/saveScore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: player, game: 'Hangman', topScore: score, numberOfRounds,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.id) {
+            document.getElementById('saveScoreFeedback').classList.remove('d-none');
+            document.getElementById('saveScoreFeedback').innerHTML = 'Score saved successfully';
+          } else {
+            document.getElementById('saveScoreFeedback').classList.remove('d-none');
+            document.getElementById('saveScoreFeedback').innerHTML = data.message;
+          }
+        });
+    }
+  },
+
   start() {
     fetch('https://random-word-api.herokuapp.com/word?number=512')
       .then((response) => response.json())
@@ -145,6 +198,7 @@ const controller = {
       });
 
     controller.setUser();
+    document.getElementById('login-button').addEventListener('click', controller.logIn);
 
     document.getElementById('newGame').addEventListener('click', controller.loadGame);
 
@@ -162,7 +216,6 @@ const controller = {
           letterIndex = randomWord.indexOf(letter, letterIndex + 1);
         }
         view.renderPlaceholders();
-        console.log(score);
         controller.checkWin();
       } else {
         lives -= 1;
