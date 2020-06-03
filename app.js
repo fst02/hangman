@@ -1,3 +1,5 @@
+/* global $ */
+
 let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 let randomWord;
 let lives;
@@ -109,37 +111,12 @@ const controller = {
     score = lives * 10;
     view.switchButtonName();
   },
-  getValueOrDefault(message, defaultValue) {
-    const temp = prompt(message, defaultValue);
-    if (temp == null) {
-      return defaultValue;
-    }
-    return temp;
-  },
   resetScore() {
     winCount = 0;
     window.localStorage.setItem('winCountKey', 0);
     lossCount = 0;
     window.localStorage.setItem('lossCountKey', 0);
   },
-  setUser() {
-    let player = window.localStorage.getItem('userName');
-    if (player == null) {
-      player = controller.getValueOrDefault('Please choose a name: ', 'Anonymous');
-    } else {
-      player = controller.getValueOrDefault('Please change your name, if you wish: ', player);
-      if (player !== window.localStorage.getItem('userName')) {
-        controller.resetScore();
-      }
-    }
-    window.localStorage.setItem('userName', player);
-    document.getElementById('welcomeUser').innerHTML = `Welcome ${player} !`;
-    if (winCount == null || lossCount == null) {
-      controller.resetScore();
-    }
-    view.renderScore();
-  },
-
   logIn() {
     const email = document.getElementById('signInEmail').value;
     const password = document.getElementById('signInPassword').value;
@@ -152,16 +129,22 @@ const controller = {
     })
       .then((response) => response.json())
       .then((data) => {
+        const signInFeedback = document.getElementById('signInFeedback');
         if (!data.token) {
           document.getElementById('register').classList.remove('d-none');
+          signInFeedback.classList.remove('d-none');
+          signInFeedback.innerHTML = data.error;
         } else {
           window.localStorage.setItem('token', data.token);
+          document.getElementById('buttonSignIn').classList.add('d-none');
+          $('#signIn').modal('hide');
+          document.getElementById('welcomeUser').innerHTML = `Welcome ${data.user.nickname} !`;
         }
       });
   },
 
   sendToLeaderboard() {
-    const numberOfRounds = winCount + lossCount;
+    const numberOfRounds = parseInt(winCount, 10) + parseInt(lossCount, 10);
     const player = window.localStorage.getItem('userName');
     const token = window.localStorage.getItem('token');
     if (!token) {
@@ -197,7 +180,6 @@ const controller = {
         words = data;
       });
 
-    controller.setUser();
     document.getElementById('login-button').addEventListener('click', controller.logIn);
 
     document.getElementById('newGame').addEventListener('click', controller.loadGame);
