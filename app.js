@@ -4,6 +4,7 @@ let lives;
 let wrongLetters = [];
 const placeholders = [];
 let status;
+let score;
 let winCount = window.localStorage.getItem('winCountKey');
 let lossCount = window.localStorage.getItem('lossCountKey');
 
@@ -96,12 +97,14 @@ const controller = {
     if (!placeholders.includes('_')) {
       controller.setStatus('success');
     }
+    score = lives * 10;
     view.switchButtonName();
   },
   checkLose() {
     if (lives === 0) {
       controller.setStatus('failed');
     }
+    score = lives * 10;
     view.switchButtonName();
   },
   getValueOrDefault(message, defaultValue) {
@@ -159,6 +162,7 @@ const controller = {
           letterIndex = randomWord.indexOf(letter, letterIndex + 1);
         }
         view.renderPlaceholders();
+        console.log(score);
         controller.checkWin();
       } else {
         lives -= 1;
