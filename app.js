@@ -137,7 +137,6 @@ const controller = {
         } else {
           window.localStorage.setItem('token', data.token);
           window.localStorage.setItem('nickname', data.user.nickname);
-          window.localStorage.setItem('userId', data.user.id);
           document.getElementById('buttonSignIn').classList.add('d-none');
           document.getElementById('buttonSignOut').classList.remove('d-none');
           document.getElementById('saveScoreFeedback').classList.add('d-none');
@@ -150,7 +149,6 @@ const controller = {
   logOut() {
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('nickname');
-    window.localStorage.removeItem('userId');
     document.getElementById('saveScoreFeedback').classList.remove('d-none');
     document.getElementById('buttonSignIn').classList.remove('d-none');
     document.getElementById('buttonSignOut').classList.add('d-none');
@@ -158,7 +156,6 @@ const controller = {
   },
 
   sendToLeaderboard() {
-    const userId = window.localStorage.getItem('userId');
     const token = window.localStorage.getItem('token');
     if (token) {
       fetch('http://fullstack.braininghub.com:3000/api/saveScore', {
