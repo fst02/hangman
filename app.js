@@ -168,7 +168,7 @@ const controller = {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId, game: 'Hangman', score,
+          gameId: 1, score,
         }),
       })
         .then((response) => response.json())
