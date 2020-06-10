@@ -1,9 +1,12 @@
+/* global $ */
+
 let words = ['wonderful', 'impossible', 'beautiful', 'adventurous', 'absurd', 'nice', 'book'];
 let randomWord;
 let lives;
 let wrongLetters = [];
 const placeholders = [];
 let status;
+let score;
 let winCount = window.localStorage.getItem('winCountKey') || 0;
 let lossCount = window.localStorage.getItem('lossCountKey') || 0;
 
@@ -95,21 +98,18 @@ const controller = {
   checkWin() {
     if (!placeholders.includes('_')) {
       controller.setStatus('success');
+      score = lives * 10;
+      controller.sendToLeaderboard();
     }
+
     view.switchButtonName();
   },
   checkLose() {
     if (lives === 0) {
       controller.setStatus('failed');
     }
+    score = lives * 10;
     view.switchButtonName();
-  },
-  getValueOrDefault(message, defaultValue) {
-    const temp = prompt(message, defaultValue);
-    if (temp == null) {
-      return defaultValue;
-    }
-    return temp;
   },
   resetScore() {
     winCount = 0;
@@ -117,31 +117,106 @@ const controller = {
     lossCount = 0;
     window.localStorage.setItem('lossCountKey', 0);
   },
-  setUser() {
-    let player = window.localStorage.getItem('userName');
-    if (player == null) {
-      player = controller.getValueOrDefault('Please choose a name: ', 'Anonymous');
-    } else {
-      player = controller.getValueOrDefault('Please change your name, if you wish: ', player);
-      if (player !== window.localStorage.getItem('userName')) {
-        controller.resetScore();
-      }
-    }
-    window.localStorage.setItem('userName', player);
-    document.getElementById('welcomeUser').innerHTML = `Welcome ${player} !`;
-    if (winCount == null || lossCount == null) {
-      controller.resetScore();
-    }
-    view.renderScore();
+  logIn() {
+    const email = document.getElementById('signInEmail').value;
+    const password = document.getElementById('signInPassword').value;
+    fetch('http://fullstack.braininghub.com:3000/api/authenticateUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const signInFeedback = document.getElementById('signInFeedback');
+        if (!data.token) {
+          document.getElementById('register').classList.remove('d-none');
+          signInFeedback.classList.remove('d-none');
+          signInFeedback.innerHTML = data.error;
+        } else {
+          window.localStorage.setItem('token', data.token);
+          window.localStorage.setItem('nickname', data.user.nickname);
+          window.localStorage.setItem('userId', data.user.id);
+          document.getElementById('buttonSignIn').classList.add('d-none');
+          document.getElementById('buttonSignOut').classList.remove('d-none');
+          document.getElementById('saveScoreFeedback').classList.add('d-none');
+          $('#signIn').modal('hide');
+          document.getElementById('welcomeUser').innerHTML = `Welcome ${data.user.nickname} !`;
+        }
+      });
   },
+
+  logOut() {
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem('nickname');
+    window.localStorage.removeItem('userId');
+    document.getElementById('saveScoreFeedback').classList.remove('d-none');
+    document.getElementById('buttonSignIn').classList.remove('d-none');
+    document.getElementById('buttonSignOut').classList.add('d-none');
+    document.getElementById('welcomeUser').classList.add('d-none');
+  },
+
+  sendToLeaderboard() {
+    const token = window.localStorage.getItem('token');
+    if (token) {
+      fetch('http://fullstack.braininghub.com:3000/api/saveScore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          gameId: 1, score,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.id) {
+            document.getElementById('saveScoreFeedback').classList.remove('d-none');
+            document.getElementById('saveScoreFeedback').innerHTML = 'Score saved successfully';
+          } else {
+            document.getElementById('saveScoreFeedback').classList.remove('d-none');
+            document.getElementById('saveScoreFeedback').innerHTML = data.message;
+          }
+        });
+    }
+  },
+
   start() {
     fetch('https://random-word-api.herokuapp.com/word?number=512')
       .then((response) => response.json())
       .then((data) => {
         words = data;
       });
+    view.renderScore();
+    const nickname = window.localStorage.getItem('nickname');
+    const token = window.localStorage.getItem('token');
+    if (token) {
+      fetch('http://fullstack.braininghub.com:3000/api/verifyToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.response === 'ok') {
+            document.getElementById('welcomeUser').innerHTML = `Welcome ${nickname}!`;
+            document.getElementById('buttonSignIn').classList.add('d-none');
+            document.getElementById('saveScoreFeedback').classList.add('d-none');
+            document.getElementById('buttonSignOut').classList.remove('d-none');
+          } else {
+            window.localStorage.removeItem('token');
+            window.localStorage.removeItem('nickname');
+          }
+        });
+    }
 
-    controller.setUser();
+    document.getElementById('login-button').addEventListener('click', controller.logIn);
+
+    document.getElementById('buttonSignOut').addEventListener('click', controller.logOut);
 
     document.getElementById('newGame').addEventListener('click', controller.loadGame);
 

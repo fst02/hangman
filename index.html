@@ -1,23 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <script lang="javascript" src="app.js" defer></script>
-        <title>Hangman</title>
-    </head>
-    <body>
-        <h1>Hangman</h1>
-        <p id="welcomeUser"></p>
-        <p id="userScore"></p>
-        <p>Hangman is a paper and pencil guessing game for two or more players. <br>
-            One player thinks of a word, phrase or sentence and the other(s) tries to guess it by suggesting letters within a certain number of guesses. <br>
-            <a href="https://en.wikipedia.org/wiki/Hangman_(game)" target="_blank">Read More</a></p>
-        <img src="images/gallow6.png" id="gallowTree" alt="Gallow tree">  
-        <p id="placeholders"></p>
-        <p id="wrongLetters"></p>
-        <p id="randomWord"></p>
-        <p id="resultMessage"></p>
-        <button id="newGame" type="button">New game</button>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script lang="javascript" src="app.js" defer></script>
+    <script language="javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script language="javascript" src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script language="javascript" src="node_modules/popper.js/dist/popper.min.js"></script>
+    <title>Hangman</title>
+</head>
+
+<body>
+    <h1>Hangman</h1>
+    <p id="saveScoreFeedback">Please sign in to save your next score to leaderboard</p>
+    <button type="button" id="buttonSignIn" data-toggle="modal" data-target="#signIn">Sign in</button>
+    <button class="d-none" type="button" id="buttonSignOut">Sign out</button>
+    <div class="modal fade" id="signIn" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Sign In</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="signInFeedback" class="alert alert-danger d-none"></div>
+                    <a class="d-none" id="register" href="http://fullstack.braininghub.com:3000/registration/show"
+                        target="_blank">Click to register</a>
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input type="email" class="form-control" id="signInEmail" name="email"
+                            placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="signInPassword" name="password"
+                            placeholder="Enter password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" id="login-button">Sign in</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p id="welcomeUser"></p>
+    <p id="userScore"></p>
+    <p>Hangman is a paper and pencil guessing game for two or more players. <br>
+        One player thinks of a word, phrase or sentence and the other(s) tries to guess it by suggesting letters within
+        a certain number of guesses. <br>
+        <a href="https://en.wikipedia.org/wiki/Hangman_(game)" target="_blank">Read More</a></p>
+    <img src="images/gallow6.png" id="gallowTree" alt="Gallow tree">
+    <p id="placeholders"></p>
+    <p id="wrongLetters"></p>
+    <p id="randomWord"></p>
+    <p id="resultMessage"></p>
+    <button id="newGame" type="button">New game</button>
+</body>
+
 </html>
