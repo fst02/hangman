@@ -142,6 +142,7 @@ const controller = {
           document.getElementById('buttonSignOut').classList.remove('d-none');
           document.getElementById('saveScoreFeedback').classList.add('d-none');
           $('#signIn').modal('hide');
+          document.getElementById('welcomeUser').classList.remove('d-none');
           document.getElementById('welcomeUser').innerHTML = `Welcome ${data.user.nickname} !`;
         }
       });
@@ -155,6 +156,7 @@ const controller = {
     document.getElementById('buttonSignIn').classList.remove('d-none');
     document.getElementById('buttonSignOut').classList.add('d-none');
     document.getElementById('welcomeUser').classList.add('d-none');
+    document.getElementById('saveScoreFeedback').innerHTML = '';
   },
 
   sendToLeaderboard() {
