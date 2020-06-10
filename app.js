@@ -4,8 +4,8 @@ let lives;
 let wrongLetters = [];
 const placeholders = [];
 let status;
-let winCount = window.localStorage.getItem('winCountKey');
-let lossCount = window.localStorage.getItem('lossCountKey');
+let winCount = window.localStorage.getItem('winCountKey') || 0;
+let lossCount = window.localStorage.getItem('lossCountKey') || 0;
 
 function isCharacterValid(event) {
   const key = event.keyCode;
