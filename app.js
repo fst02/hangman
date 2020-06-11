@@ -31,7 +31,8 @@ const view = {
   renderScore() {
     winCount = window.localStorage.getItem('winCountKey');
     lossCount = window.localStorage.getItem('lossCountKey');
-    document.getElementById('userScore').innerHTML = `Your wins: ${winCount}<br>Your losses: ${lossCount}`;
+    document.getElementById('userWinScore').innerHTML = `Your wins: ${winCount}`;
+    document.getElementById('userLossScore').innerHTML = `Your losses: ${lossCount}`;
   },
   renderImage() {
     const gallowSrc = `images/gallow${lives}.png`;
