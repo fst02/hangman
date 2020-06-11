@@ -43,10 +43,12 @@ const view = {
   switchButtonName() {
     switch (status) {
       case 'inProgress':
-        document.getElementById('newGame').innerHTML = 'Restart';
+        document.getElementById('newGame').classList.add('d-none');
+        document.getElementById('restart').classList.remove('d-none');
         break;
       default:
-        document.getElementById('newGame').innerHTML = 'New game';
+        document.getElementById('restart').classList.add('d-none');
+        document.getElementById('newGame').classList.remove('d-none');
         break;
     }
   },
@@ -64,12 +66,6 @@ const controller = {
     view.setResult('', '');
   },
   loadGame() {
-    if (document.getElementById('newGame').innerHTML !== 'New game') {
-      if (!window.confirm('Are you sure you want to restart your game?')) {
-        return;
-      }
-      controller.setStatus('failed');
-    }
     controller.init();
     document.getElementById('randomWord').innerHTML = randomWord;
     for (let i = 0; i < randomWord.length; i++) {
@@ -205,6 +201,7 @@ const controller = {
         .then((response) => response.json())
         .then((data) => {
           if (data.response === 'ok') {
+            view.renderScore();
             document.getElementById('welcomeUser').innerHTML = `Welcome ${nickname}!`;
             document.getElementById('buttonSignIn').classList.add('d-none');
             document.getElementById('saveScoreFeedback').classList.add('d-none');
@@ -221,6 +218,14 @@ const controller = {
     document.getElementById('buttonSignOut').addEventListener('click', controller.logOut);
 
     document.getElementById('newGame').addEventListener('click', controller.loadGame);
+
+    document.getElementById('yesButton').addEventListener('click', () => {
+      $('#restart-modal').modal('hide');
+      lives = 0;
+      this.setStatus('failed');
+      this.checkLose();
+      controller.loadGame();
+    });
 
     document.addEventListener('keydown', (event) => {
       const letter = event.key.toLowerCase();
