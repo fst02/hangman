@@ -7,8 +7,8 @@ let wrongLetters = [];
 const placeholders = [];
 let status;
 let score;
-let winCount = window.localStorage.getItem('winCountKey') || 0;
-let lossCount = window.localStorage.getItem('lossCountKey') || 0;
+let winCount;
+let lossCount;
 
 function isCharacterValid(event) {
   const key = event.keyCode;
@@ -29,6 +29,8 @@ const model = {
 
 const view = {
   renderScore() {
+    winCount = window.localStorage.getItem('winCountKey');
+    lossCount = window.localStorage.getItem('lossCountKey');
     document.getElementById('userScore').innerHTML = `Your wins: ${winCount}<br>Your losses: ${lossCount}`;
   },
   renderImage() {
@@ -78,14 +80,10 @@ const controller = {
   setStatus(newStatus) {
     switch (newStatus) {
       case 'success':
-        winCount++;
-        window.localStorage.setItem('winCountKey', winCount);
         view.setResult('Congratulations, You won!', 'red');
         status = 'success';
         break;
       case 'failed':
-        lossCount++;
-        window.localStorage.setItem('lossCountKey', lossCount);
         view.setResult('You lost!', 'blue');
         status = 'failed';
         document.getElementById('randomWord').style.display = 'block';
@@ -105,17 +103,12 @@ const controller = {
     view.switchButtonName();
   },
   checkLose() {
+    score = lives * 10;
     if (lives === 0) {
       controller.setStatus('failed');
+      controller.sendToLeaderboard();
     }
-    score = lives * 10;
     view.switchButtonName();
-  },
-  resetScore() {
-    winCount = 0;
-    window.localStorage.setItem('winCountKey', 0);
-    lossCount = 0;
-    window.localStorage.setItem('lossCountKey', 0);
   },
   logIn() {
     const email = document.getElementById('signInEmail').value;
@@ -125,7 +118,7 @@ const controller = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, gameId: 1 }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -138,12 +131,15 @@ const controller = {
           window.localStorage.setItem('token', data.token);
           window.localStorage.setItem('nickname', data.user.nickname);
           window.localStorage.setItem('userId', data.user.id);
+          window.localStorage.setItem('winCountKey', data.numberOfWins);
+          window.localStorage.setItem('lossCountKey', data.numberOfRounds - data.numberOfWins);
           document.getElementById('buttonSignIn').classList.add('d-none');
           document.getElementById('buttonSignOut').classList.remove('d-none');
           document.getElementById('saveScoreFeedback').classList.add('d-none');
           $('#signIn').modal('hide');
           document.getElementById('welcomeUser').classList.remove('d-none');
           document.getElementById('welcomeUser').innerHTML = `Welcome ${data.user.nickname} !`;
+          view.renderScore();
         }
       });
   },
@@ -152,6 +148,8 @@ const controller = {
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('nickname');
     window.localStorage.removeItem('userId');
+    window.localStorage.removeItem('winCountKey');
+    window.localStorage.removeItem('lossCountKey');
     document.getElementById('saveScoreFeedback').classList.remove('d-none');
     document.getElementById('buttonSignIn').classList.remove('d-none');
     document.getElementById('buttonSignOut').classList.add('d-none');
@@ -177,6 +175,9 @@ const controller = {
           if (data.id) {
             document.getElementById('saveScoreFeedback').classList.remove('d-none');
             document.getElementById('saveScoreFeedback').innerHTML = 'Score saved successfully';
+            window.localStorage.setItem('winCountKey', data.numberOfWins);
+            window.localStorage.setItem('lossCountKey', data.numberOfRounds - data.numberOfWins);
+            view.renderScore();
           } else {
             document.getElementById('saveScoreFeedback').classList.remove('d-none');
             document.getElementById('saveScoreFeedback').innerHTML = data.message;
@@ -191,7 +192,6 @@ const controller = {
       .then((data) => {
         words = data;
       });
-    view.renderScore();
     const nickname = window.localStorage.getItem('nickname');
     const token = window.localStorage.getItem('token');
     if (token) {
